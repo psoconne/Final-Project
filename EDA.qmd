@@ -5,23 +5,17 @@ format: html
 editor: visual
 ---
 
-
 ## Introduction
 
-<!-- 
-You should have an introduction section that:
-• briefly describes the data and the variables you have to work with (just discuss the ones you’ll investigate/use in your analysis).
-• describes the purpose of your EDA and ultimate goal of modeling.
- -->
-  The data used in these analyses are the results of a yearly survey that collects health-related data on Americans. The majority of the variables in this data set are binary (yes/no). Their are some variables that have more than two levels including GenHlth, Age, Education, and Income. The only variables with a numeric data type are BMI, MentHlth, and PhysHlth. 
-  
-  The purpose of our exploratory data analysis is to ensure that all data types are correct, so any variables that need to be converted to factor data type will be adjusted here. It is also good practice to determine the rate of missing values in an EDA, so if there are any missing values they can be dealt with now instead of causing issues in the modeling phase. 
-  
-  Our response variable will ultimately be Diabetes_binary, which has responses of 0 = no diabetes and 1 = diabetes. The goal of modeling will be to see which of the other variables are good at predicting diabetes.
+The data used in these analyses are the results of a yearly survey that collects health-related data on Americans. The majority of the variables in this data set are binary (yes/no). Their are some variables that have more than two levels including GenHlth, Age, Education, and Income. The only variables with a numeric data type are BMI, MentHlth, and PhysHlth.
+
+The purpose of our exploratory data analysis is to ensure that all data types are correct, so any variables that need to be converted to factor data type will be adjusted here. It is also good practice to determine the rate of missing values in an EDA, so if there are any missing values they can be dealt with now instead of causing issues in the modeling phase.
+
+Our response variable will ultimately be Diabetes_binary, which has responses of 0 = no diabetes and 1 = diabetes. The goal of modeling will be to see which of the other variables are good at predicting diabetes.
 
 ## Data
 
-> Use a relative path to import the data. 
+> Use a relative path to import the data.
 
 ```{r, message = FALSE}
 library(tidyverse)
@@ -68,9 +62,7 @@ diabetes_data <- diabetes_data |>
 str(diabetes_data)
 ```
 
-
-> Determine Rate of Missing Values
-> Below we find that there are no missing values.
+> Determine Rate of Missing Values Below we find that there are no missing values.
 
 ```{r}
 sum_na <- function(column){
@@ -81,13 +73,11 @@ na_counts <- diabetes_data |>
 na_counts
 ```
 
-
 ## Summarizations
 
 > This section contains meaningful summary statistics and plots about the data (especially as it relates to the response).
 
-> Describe numerical data
->   -  Below are summary statistics, such as count, mean, sd, etc., for the three numerical variables in the data set.
+> Describe numerical data - Below are summary statistics, such as count, mean, sd, etc., for the three numerical variables in the data set.
 
 ```{r}
 numeric_data <- diabetes_data |>
@@ -107,8 +97,6 @@ for (var in names(categorical_data)) {
   print(table(categorical_data[[var]], diabetes_data$Diabetes_binary))
 }
 ```
-
-> 
 
 ```{r}
 for (var in names(categorical_data)) {
@@ -137,6 +125,3 @@ for (var in names(numeric_data)) {
 ```{r}
 cor(numeric_data)
 ```
-
-
-
