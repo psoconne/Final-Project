@@ -1,0 +1,178 @@
+---
+title: "Modeling of Diabetes Health Indicators Dataset"
+author: "Paige O'Connell"
+format: html
+editor: visual
+---
+
+## Introduction
+
+>The response variable we will be modeling is Diabetes_binary. It has responses of 0 for "no diabetes" and 1 for "diabetes". The goal of modeling below will be to see which of the other variables are good at predicting diabetes, as well as which model performs the best.
+
+```{r, message = FALSE}
+# All libraries needed
+library(tidyverse)
+library(caret)
+library(gbm)
+```
+
+```{r, include=FALSE}
+diabetes_data <- read_csv('diabetes_binary_health_indicators_BRFSS2015.csv')
+
+diabetes_data <- diabetes_data |>
+  mutate(
+    Diabetes_binary = factor(Diabetes_binary, levels = c(0, 1), labels = c("No_Diabetes", "Diabetes")),
+    HighBP = factor(HighBP, levels = c(0, 1), labels = c("No", "Yes")),
+    HighChol = factor(HighChol, levels = c(0, 1), labels = c("No", "Yes")),
+    CholCheck = factor(CholCheck, levels = c(0, 1), labels = c("No", "Yes")),
+    Smoker = factor(Smoker, levels = c(0, 1), labels = c("No", "Yes")),
+    Stroke = factor(Stroke, levels = c(0, 1), labels = c("No", "Yes")),
+    HeartDiseaseorAttack = factor(HeartDiseaseorAttack, levels = c(0, 1), labels = c("No", "Yes")),
+    PhysActivity = factor(PhysActivity, levels = c(0, 1), labels = c("No", "Yes")),
+    Fruits = factor(Fruits, levels = c(0, 1), labels = c("No", "Yes")),
+    Veggies = factor(Veggies, levels = c(0, 1), labels = c("No", "Yes")),
+    HvyAlcoholConsump = factor(HvyAlcoholConsump, levels = c(0, 1), labels = c("No", "Yes")),
+    AnyHealthcare = factor(AnyHealthcare, levels = c(0, 1), labels = c("No", "Yes")),
+    NoDocbcCost = factor(NoDocbcCost, levels = c(0, 1), labels = c("No", "Yes")),
+    GenHlth = factor(GenHlth, levels = 1:5, labels = c("Excellent", "Very_Good", "Good", "Fair", "Poor")),
+    DiffWalk = factor(DiffWalk, levels = c(0, 1), labels = c("No", "Yes")),
+    Sex = factor(Sex, levels = c(0, 1), labels = c("Female", "Male")),
+    Age =factor(Age, levels = 1:13, labels = c("18_24", "25_29", "30_34", "35_39", "40_44", "45_49", 
+                                               "50_54", "55_59", "60_64", "65_69", "70_74", "75_79", 
+                                               "80_or_older")),
+    Education = factor(Education, levels = 1:6, labels = c("Never_Attended", "Elementary", "Some_High_School", 
+                                                           "High_School_Graduate", "Some_College", 
+                                                           "College_Graduate")),
+    Income = factor(Income, levels = 1:8, labels = c("Less_than_10k", "10k_to_15k", 
+                                                     "15k_to_20k", "20k_to_25k", 
+                                                     "25k_to_35k", "35k_to_50k", 
+                                                     "50k_to_75k", "75k_or_more"))
+  )
+```
+
+
+## Split into Training and Test Sets
+> Below we will split the data into a training (70% of the data) and a test set (30% of the data), and will use set.seed() to make things reproducible. 
+
+```{r}
+set.seed(123)
+trainIndex <- createDataPartition(diabetes_data$Diabetes_binary, p = 0.7, list = FALSE)
+diabetesTrain <- diabetes_data[trainIndex, ]
+diabetesTest <- diabetes_data[-trainIndex, ]
+```
+
+## logLoss
+
+> The goal is to create models for predicting the Diabetes_binary variable (using caret). We’ll use logLoss as our metric to evaluate models. For all model types use logLoss with 3 fold cross-validation to select the best model. You should set up your own grid of tuning parameters in any model where that is possible.
+
+> "Log Loss is a logarithmic transformation of the likelihood function, primarily used to evaluate the performance of probabilistic classifiers. Unlike other metrics such as accuracy, Log Loss takes into account the uncertainty of predictions by penalizing models more heavily for confidently incorrect predictions. Log Loss is widely used in binary and multiclass classification problems, particularly when dealing with models that output probability scores for each class (e.g., logistic regression, neural networks). It encourages models to be not only accurate but also confident in their predictions, making it particularly useful in scenarios where misclassification costs are uneven. A lower Log Loss indicates better model performance."
+
+>  -  Source: https://medium.com/@TheDataScience-ProF/understanding-log-loss-a-comprehensive-guide-with-code-examples-c79cf5411426
+
+## Logistic Regression Models
+
+> Logistic regression is used to model a response that is success or fail. It is a type of regression analysis used for predicting the outcome of a categorical dependent variable based on one or more predictor variables. The log-odds of the dependent variable being 1 (for a binary outcome) is modeled as a linear combination of the independent variables and the output of the model is always between 0 and 1. 
+
+> Logistic regression makes sense as a model for our diabetes data set since the response variable, Diabetes_binary, is binary. 
+
+> Below are three candidate logistic regression models.
+
+```{r}
+# First Logistic Regression model
+log_reg1 <- train(Diabetes_binary ~ HighBP + HighChol, 
+                  data = diabetesTrain,
+                  method = "glm",
+                  family = "binomial",
+                  metric = "logLoss",
+                  trControl = trainControl(method = "cv", number = 5, 
+                                           summaryFunction = mnLogLoss, 
+                                           classProbs = TRUE,
+                                           savePredictions = "final"))
+
+# Second Logistic Regression model
+log_reg2 <- train(Diabetes_binary ~ BMI + Age + HighBP + HighChol, 
+                  data = diabetesTrain,
+                  method = "glm",
+                  family = "binomial",
+                  metric = "logLoss",
+                  trControl = trainControl(method = "cv", number = 5, 
+                                           summaryFunction = mnLogLoss, 
+                                           classProbs = TRUE,
+                                           savePredictions = "final"))
+
+# Third Logistic Regression model
+log_reg3 <- train(Diabetes_binary ~ BMI + Age + HighBP*HighChol, 
+                  data = diabetesTrain,
+                  method = "glm",
+                  family = "binomial",
+                  metric = "logLoss",
+                  trControl = trainControl(method = "cv", number = 5, 
+                                           summaryFunction = mnLogLoss, 
+                                           classProbs = TRUE,
+                                           savePredictions = "final"))
+
+print(log_reg1)
+print(log_reg2)
+print(log_reg3)
+```
+
+> Our second and third logistic models have the smallest logLoss and their values are essentially the same. Since the second model is the less complicated model of the two, we will choose that model as our best logistic regression model.
+
+## Classification Tree
+
+> A classification tree splits up predictor space into regions and there are different predictions for each region. The goal is to classify (predict) group membership. For a given region, you usually use most prevalent class as prediction. This model might work here since we can consider no diabetes and diabetes as the classes for prediction.
+
+> Below is the fit for a classification tree with varying values for the complexity parameter.
+
+```{r}
+ct_model <- train(Diabetes_binary ~ BMI + Age + HighBP + HighChol, 
+                    data = diabetesTrain, 
+                    method = "rpart",
+                    metric = "logLoss",
+                    tuneGrid = expand.grid(cp = seq(0.001, 0.005, by = 0.001)),
+                    trControl = trainControl(method = "cv", 
+                                             number = 5, 
+                                             summaryFunction = mnLogLoss, 
+                                             classProbs = TRUE,savePredictions = "final"))
+
+ct_model
+```
+
+> The best model (best complexity parameter) based on logLoss is cp = 0.001.
+
+## Random Forest
+
+> Random Forest is an ensemble learning method that creates multiple trees from bootstrap samples and averages the results to create a more robust and accurate model. In this model, you don't use all predictors, and instead use a random subset of predictors for each bootstrap sample/tree fit. By randomly selecting a subset of predictors, a good predictor or two won't dominate the tree fits the way it would in a classification tree.
+
+```{r}
+rf_model <- train(Diabetes_binary ~ BMI + Age + HighBP + HighChol, 
+                  data = diabetesTrain, 
+                  method = "rf",
+                  metric = "logLoss",
+                  tuneGrid = expand.grid(mtry = ncol(diabetesTrain)/3),
+                  trControl = trainControl(method = "cv", 
+                                           number = 3, 
+                                           summaryFunction = mnLogLoss, 
+                                           classProbs = TRUE,
+                                           savePredictions = "final"),
+                  ntree = 100)
+print(rf_model)
+```
+
+## Final Model Selection
+> We now have three best models (one for each model type above). Now we will compare all three models on the test set and declare an overall winner!
+
+```{r}
+# Calculate predictions for each model
+log_preds <- predict(log_reg2, newdata = diabetesTest, type='prob')
+ct_preds <- predict(ct_model, newdata = diabetesTest, type='prob')
+rf_preds <- predict(rf_model, newdata = diabetesTest, type='prob')
+```
+
+```{r}
+ModelMetrics::logLoss(diabetesTest$Diabetes_binary, log_preds[,2])
+ModelMetrics::logLoss(diabetesTest$Diabetes_binary, ct_preds[,2])
+ModelMetrics::logLoss(diabetesTest$Diabetes_binary, rf_preds[,2])
+```
+
+> Based on the logLoss metric we would choose the classification tree model in this case.

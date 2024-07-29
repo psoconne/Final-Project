@@ -142,11 +142,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<!-- 
-You should have an introduction section that:
-• briefly describes the data and the variables you have to work with (just discuss the ones you’ll investigate/use in your analysis).
-• describes the purpose of your EDA and ultimate goal of modeling.
- -->
 <p>The data used in these analyses are the results of a yearly survey that collects health-related data on Americans. The majority of the variables in this data set are binary (yes/no). Their are some variables that have more than two levels including GenHlth, Age, Education, and Income. The only variables with a numeric data type are BMI, MentHlth, and PhysHlth.</p>
 <p>The purpose of our exploratory data analysis is to ensure that all data types are correct, so any variables that need to be converted to factor data type will be adjusted here. It is also good practice to determine the rate of missing values in an EDA, so if there are any missing values they can be dealt with now instead of causing issues in the modeling phase.</p>
 <p>Our response variable will ultimately be Diabetes_binary, which has responses of 0 = no diabetes and 1 = diabetes. The goal of modeling will be to see which of the other variables are good at predicting diabetes.</p>
@@ -457,9 +452,6 @@ PhysHlth 0.02</code></pre>
   75k_or_more         83190     7195</code></pre>
 </div>
 </div>
-<blockquote class="blockquote">
-
-</blockquote>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (var <span class="cf">in</span> <span class="fu">names</span>(categorical_data)) {</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(diabetes_data, <span class="fu">aes_string</span>(<span class="at">x =</span> var, <span class="at">fill =</span> <span class="st">"Diabetes_binary"</span>)) <span class="sc">+</span></span>
